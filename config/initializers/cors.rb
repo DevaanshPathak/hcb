@@ -19,10 +19,14 @@ Rails.application.config.middleware.insert_before 0, Rack::Cors do
 
   allow do
     origins do |source, _env|
-      domains.each do |domain|
+      if source.present?
         parsed = URI.parse(source)
-        domain == source || domain == parsed.host
+        domains.any? { |domain| domain == source || domain == parsed.host }
+      else
+        false
       end
+    rescue URI::InvalidURIError
+      false
     end
 
     resource "/api/*",
